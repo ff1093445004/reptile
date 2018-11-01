@@ -1,0 +1,167 @@
+#爬虫概念、工具和HTTP
+### 1.什么爬虫
+-爬虫就是'模拟客户端(浏览器)发送网络请求'，获取响应，按照规则提取数据的程序
+'模拟客户端(浏览器)发送网络谓求' :照着浏览器发送一横一样的请求 ，获取和浏览器一模一样的数据
+### 2.爬虫的数据去哪了
+-呈现出来：展示在网页上，或者是展示在app上
+-进行分析：从数据中寻找一些规律
+### 3.需要的软件和环境
+-python3
+-黑马python基础班15天视屏：http://yun.itheima.com/course/214.html
+-基础语法（字符串，列表，字典，判断和循环）
+-函数（函数的创建和调用）
+-面向对象（如何创建一个类，如何使用这个类）
+-pycharm
+-python编辑器
+-chrome浏览器
+-分析网络请求用的
+### 4.浏览器的请求
+- url = 请求的协议+网站的域名+资源的路径+参数
+-浏览器请求url地址
+-当前url对应的响应+js+css+图片——>elements中的内容
+-爬虫请求url地址
+-当前url对应的响应
+-elements的内容和爬虫获取到的url地址的响应不同，爬虫中需要以当前url地址对应的响应为准提取数据
+-当前url地址对应的响应在哪里
+-从network中找到当前的url地址，点击response
+-在页面上右键显示网页源码
+### 5•认识HTTP、HTTPS
+-HTTP:超文本传输协议
+-以明文的形式传输
+-效率更离，但是不安全
+-HTTPS:HTTP + SSL(安全套接字层)
+-传输之前数据先加密，之后解密获取内容
+-效率较低，但是安全
+-get请求和post谓求的区别
+-get请求没有请求体，post有，get请求把数据放到url地址中
+-post请求常用于登录注册，
+-post请求携带的数据置比get谓求大，多，常用于传输大文本的时候
+-HTTP协议之请求
+-1.请求行
+-2.请求头
+-User-Agent:用户代理：对方服务器能够通过User_agent知道当前请求对方资源是什么浏览器
+-如果我们需要模似手机版的浏览器发送请求，对应的，就需要把user_agent改成手机版
+- Cookie:用来存储用户倍息的，每次谓求会被携带上发送给对方的浏览器
+-要获取登录后才能访问的页面
+-对方的服务器会通过cookie来判断是我们是一个爬虫
+-3.请求体
+-携带数据
+-get请求没有请求体
+-post请求有请求体
+-HTTP协议之响应
+-1.响应头
+-Set-Cookie：对方服务器通过该字段设置cookie到本地
+-2.响应体
+- url地址对应的响应
+########################################################################################################################################
+## requests模块的学习
+-pip install reqeusts
+###发送get, post谓求，获取响应
+-response = requests.get(url) 						#发送get请求，请求url地址对应的响应
+-response = reqeusts.post{url,data={请求体的字典})	#发送post请求
+### response的方法
+-response.text
+-该方式往往会出现乱码，出现乱码使用response_encoding="utf-8"
+-response.content.decode()
+-把响应的二进制字节流转化为str类型
+-response.request.url 		#发送请求的url地址
+-response.url 				#response响应的url地址
+-response.request.headers 	#请求头
+-response.headers 			#响应头
+###获取网页源码的正确打开方式(通过下面三种方式一定能够获取到网页的正确解码之后的字符串）
+-1.response.content.decode()
+-2.response.content.decode("gbk")
+-3.response.text
+###发送带header的请求
+-为了模拟浏览器，获取和浏览器一模一样的内容
+headers = {
+"User-Agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like OS X) AppleWebKit/602.1.50 (KHTML, like Gecko)CriOS/56.0.2924.75 Hobile/14E5239e Safari/602.1",
+"Referer": "http://fanyi.baidu.com/?aldtype=16047"
+}
+response = requests.get(url,headers=headers)
+### retrying模块的学习
+-pip install retrying
+
+from retrying import retry
+@retry (stop_max_attempt_number=3)  #尝试三次,最后报错
+def funl():
+	print('this is fund")
+	raise ValueError('this is test error")
+###处理cookie相关的请求
+-人人网{"email":"mr_mao_hacker@163.com", "password":"alarmchime"}
+-直接携带cookie请求url地址
+-1.cookie放在headers中
+headers= {"User-Agent":"Cookie":"cookie 字符串"}
+-2.cookie字典传给cookies参数
+cookie="UM_distinctid=166c8b13b312bf-0c89267367bbce-3e63430c-15f900-166c8b13b3260d; CNZZDATA1260938422=1166608611-1540964183-%7C1540964183; bcolor=; font=; size=; fontcolor=; width="
+cookie_dict={i.split("="):i.split("1") for i in cookie.split("; ")}}
+requests.get(url,cookies=cookie_dict)
+-3.先发送post请求，获取cookie,带上cookie请求登录后的页面
+--1.seesion = requests.session()		#session具有的方法和requests一样
+--2.session.post(url,data,headers) 		#服务器设置在本地的cookie会存在session
+--3.session.get(url) 					#会带上之前保存在session中的cookie,能够请求成功
+########################################################################################################################################
+##数据提取方法
+### json
+-数据交换格式，看起来像python类型(列表，字典)的字符串 
+-使用json之前需要导入
+-哪里会返回json的数据 
+	-流程器切换到手机版 
+	-抓包app
+-json.loads
+	-把:json字符串转化为python类型 
+	-'json.loads(json字符串厂
+-json.dumps
+	-把python类型转化为json字符串 
+	-json.dumps({})
+	-json.dumps(retl,ensure_ascii=False,indent=2) 
+		-ensure_ascii :让中文显示成中文 
+		-indent :能够让下一行在上一行的基础上空格
+
+### xpath和Ixml 
+-xpath
+-一门从html中提取数据的语言 
+-xpath语法
+-xpath helper插件：辟助我们从'elements'中定位数据 
+-1.能够选中html下的head下的所有的meta标签:'/html/head/meta'
+-2.从任意节点开始选择:'//'
+	-当前页面上的所有的li标签:'//li'
+	-head下的所有的link标签:'/html/head//link'
+-3.'@'符号的用途
+	-选择class='feed'的div下的ul下的li: '//div[@class="feed"]/ul/li'
+	-选择a的href的值:'a/@href'
+-4.获取文本：
+	-获取a下的文本:'a/text()' 
+	-获取a下的所有的文本:'/a//text()'
+-5.当前
+	-当前节点下的a标签:'./a' 
+
+-lxml
+- 安装：pip install lxml
+-使用:
+from Ixml import etree
+element = etree.HTML('html字符串')
+element.xpath("")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
