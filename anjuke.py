@@ -1,6 +1,6 @@
 # -*- coding:UTF-8 -*-
 import requests
-from bs4 import BeautifulSoup
+
 
 if __name__ == '__main__':
     target = 'https://nj.fang.anjuke.com/loupan/s?kw='
@@ -9,6 +9,4 @@ if __name__ == '__main__':
     }
     req = requests.get(url=target, headers=headers)
     html = req.text
-    bf = BeautifulSoup(html, 'html.parser')
-    r = bf.find_all('div', class_='item-mod')
-    print(r)
+

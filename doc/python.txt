@@ -118,7 +118,7 @@ requests.get(url,cookies=cookie_dict)
 		-ensure_ascii :让中文显示成中文 
 		-indent :能够让下一行在上一行的基础上空格
 
-### xpath和Ixml 
+### xpath和lxml 
 -xpath
 -一门从html中提取数据的语言 
 -xpath语法
@@ -143,6 +143,36 @@ from Ixml import etree
 element = etree.HTML('html字符串')
 element.xpath("")
 
+###基础知识点的学习 
+-format:字符串格式化的一种方式 
+"传智{}播客".format(l)
+"传智{}播客".format([l,2,3])
+"传智播客".format({l,2,3})
+"传智播客{}".format({l,2,3},[l,23,2])
+"传智{}播客{}".format({l,2,3},l)
+-列表推导式
+-帮助我们快速的生成包含一堆数据的列表 
+[i+10 for i in ranged(1,10)] —> [10,11,12, .19] 
+["10月{}日".format(i) for i in range(1,10}] —> ["10月1日","10月2日"..."10月9日"]
+-字典推导式
+-帮助我们快速的生成包含一堆数据的字典 
+{i+10:i for i in range(10)} -> {10:0,11:1,12:2...19:9}
+{"a{}".format(i):10 for i in range(3)} -> {"a0":10, "a1":10, ...}
+-三元运算符
+-if后面的条件成立，就把if前面的结果賦值给a,否则把else后面的结果赋值给a 
+a = 10 if 4>3 else 20 #a = 10 
+a = 10 if 4<3 else 20 #a = 20
+
+###写爬虫的讨论
+-1.url
+-知道url地址的规律和总得页码数:构造url地址的列表 
+-start_url
+-2.发送请求，获取晌应 
+-requests
+-3.提取数据
+-返回json字符串：json模块
+-返回的是html字符串：lxml块配合xpath提取数据
+-4•保存
 
 
 

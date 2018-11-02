@@ -14,7 +14,7 @@ class douBan(object):
             target = self.target.format(i)
             req = requests.get(target, headers=self.headers)
             j = json.loads(req.text)
-            with open('douban_wenxue.txt', 'a', encoding='utf-8') as f:
+            with open('wenjian.txt', 'a', encoding='utf-8') as f:
                 f.write(json.dumps(j, ensure_ascii=False, indent=2))
                 f.write('\n')
         
