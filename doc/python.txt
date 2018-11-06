@@ -110,7 +110,7 @@ requests.get(url,cookies=cookie_dict)
 	-抓包app
 -json.loads
 	-把:json字符串转化为python类型 
-	-'json.loads(json字符串厂
+	-json.loads(json)字符串
 -json.dumps
 	-把python类型转化为json字符串 
 	-json.dumps({})
