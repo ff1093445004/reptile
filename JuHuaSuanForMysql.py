@@ -1,8 +1,8 @@
 from selenium import webdriver
 from lxml import etree
 import json
-import redis
 import time
+import pymysql
 
 
 class zhangui(object):
@@ -20,7 +20,7 @@ class zhangui(object):
     def downLoad(self):
         browser = webdriver.Chrome()
         pl = []
-        for i in range(1, 10):
+        for i in range(1, 11):
             browser.get(self.url.format(i))
             h = browser.page_source
             html = etree.HTML(h)
@@ -38,33 +38,63 @@ class zhangui(object):
         browser.close()
         return pl
 
-    def save(self, pl):
-        pool = redis.ConnectionPool(host='127.0.0.1', port=6379)
-        r = redis.Redis(connection_pool=pool)
-        for i, p in enumerate(pl):
-            print(str(i) + ":" + str(p.id))
-            r.set(p.id, json.dumps(p, default=o2j, ensure_ascii=False))
-
 
 class product(object):
-    def __init__(self, id, name, desc, price, producer, img, tags):
-        self.id = id
+    def __init__(self, pid, name, des, price, producer, img, tags):
+        self.id = pid
         self.name = name
-        self.desc = desc
+        self.des = des
         self.price = price
         self.producer = producer
         self.img = img
         self.tags = tags
 
 
+def save(pl):
+    conn = pymysql.connect(host='localhost', port=3306, user='root', passwd='', db='pretty_cat', charset='UTF8')
+    cur = conn.cursor()
+    if not cur.execute("show tables like 'product'"):
+        createSql = """CREATE TABLE PRODUCT (
+            ID NVARCHAR(20) PRIMARY KEY,
+            NAME NVARCHAR(100),
+            PRICE DOUBLE,
+            IMG NVARCHAR(200),
+            DES NVARCHAR(500),
+            PRODUCER NVARCHAR(100),
+            TAGS NVARCHAR(100)
+         )"""
+        print(createSql)
+        cur.execute(createSql)
+        for product in pl:
+            sql = "INSERT INTO PRODUCT(ID, NAME, PRICE, IMG, DES, PRODUCER, TAGS) VALUES ('%s','%s','%d','%s','%s','%s','%s')" \
+                  % (product.id, product.name, float(product.price), product.img, product.des, product.producer, ",".join(product.tags))
+            print(sql)
+            cur.execute(sql)
+            conn.commit()
+        return
+    for product in pl:
+        searchSql = "SELECT * FROM PRODUCT WHERE ID = '%s'" % product.id
+        if not cur.execute(searchSql):
+            sql = "INSERT INTO PRODUCT(ID, NAME, PRICE, IMG, DES, PRODUCER, TAGS) VALUES ('%s','%s','%d','%s','%s','%s','%s')" \
+                  % (product.id, product.name, float(product.price), product.img, product.des, product.producer, ",".join(product.tags))
+        else:
+            sql = "UPDATE PRODUCT SET NAME = '%s', PRICE = '%d', IMG = '%s', DES = '%s', PRODUCER = '%s', TAGS = '%s' WHERE ID = '%s'" \
+                  % (product.name, float(product.price), product.img, product.des, product.producer, ",".join(product.tags), product.id)
+        print(sql)
+        cur.execute(sql)
+        conn.commit()
+    cur.close()
+    conn.close()
+
+
 def o2j(p):
     return {
         "id": p.id,
         "name": p.name,
-        "desc": p.desc,
         "price": p.price,
-        "producer": p.producer,
         "img": p.img,
+        "des": p.des,
+        "producer": p.producer,
         "tags": p.tags
     }
 
@@ -72,5 +102,5 @@ def o2j(p):
 if __name__ == '__main__':
     zr = zhangui()
     productList = zr.downLoad()
-    zr.save(productList)
+    save(productList)
     print("=============完成=============")
